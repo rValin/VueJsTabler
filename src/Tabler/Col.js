@@ -1,5 +1,0 @@
-class Col {
-    constructor() {
-    
-    }
-}

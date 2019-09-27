@@ -56,7 +56,7 @@
                     cols: [],
                 };
 
-                this.keyToCols(this.config.root).forEach(col => {
+                this.keysToCols(this.config.root).forEach(col => {
                     this.loadCol(data, col, undefined);
                 });
 
@@ -136,7 +136,7 @@
 
                 let colspan = 0;
                 if (col.subCols !== undefined && col.subCols.length > 0) {
-                    this.keyToCols(col.subCols).forEach(subCol => {
+                    this.keysToCols(col.subCols).forEach(subCol => {
                         colspan += this.colspan(subCol);
                     });
                 }
@@ -160,7 +160,7 @@
                     return;
                 }
 
-                this.keyToCols(col.subCols).forEach(subCol => {
+                this.keysToCols(col.subCols).forEach(subCol => {
                     this.loadCol(data, subCol, {
                         parent: parent,
                         col
@@ -176,7 +176,7 @@
                     return col.value(line, values);
                 }
             },
-            keyToCols(keys) {
+            keysToCols(keys) {
                 return keys.map(key => {
                     let col = this.config.cols[key];
                     col.key = key;
@@ -191,13 +191,13 @@
                 col.expanded = value !== undefined ? value : !col.expanded;
 
                 if (!col.expanded && col.subCols && col.subCols.length > 0) {
-                    this.keyToCols(col.subCols).forEach(this.hide)
+                    this.keysToCols(col.subCols).forEach(this.hide)
                 }
             },
             hide(col) {
                 col.visible = false;
                 if (col.subCols && col.subCols.length > 0) {
-                    this.keyToCols(col.subCols).forEach(this.hide)
+                    this.keysToCols(col.subCols).forEach(this.hide)
                 }
             }
         }

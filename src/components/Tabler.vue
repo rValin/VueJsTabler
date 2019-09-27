@@ -15,8 +15,8 @@
             <tbody>
             <tr v-for="line in values">
                 <td v-for="col in cols.cols">
-                    <slot :name="'col-value-' + col.col.key" :line="line">
-                        {{ getValue(col.col, line) }}
+                    <slot :name="'col-value-' + col.col.key" :line="line" :col="col.col" :values="values">
+                        {{ getValue(col.col, line, values) }}
                     </slot>
                 </td>
             </tr>
@@ -56,7 +56,7 @@
                     cols: [],
                 };
 
-                this.config.cols.forEach(col => {
+                this.keyToCols(this.config.root).forEach(col => {
                     this.loadCol(data, col, undefined);
                 });
 
@@ -136,7 +136,7 @@
 
                 let colspan = 0;
                 if (col.subCols !== undefined && col.subCols.length > 0) {
-                    col.subCols.forEach(subCol => {
+                    this.keyToCols(col.subCols).forEach(subCol => {
                         colspan += this.colspan(subCol);
                     });
                 }
@@ -160,7 +160,7 @@
                     return;
                 }
 
-                col.subCols.forEach(subCol => {
+                this.keyToCols(col.subCols).forEach(subCol => {
                     this.loadCol(data, subCol, {
                         parent: parent,
                         col
@@ -169,25 +169,35 @@
             },
 
 
-            getValue(col, line) {
+            getValue(col, line, values) {
                 if (typeof col.value === 'string') {
                     return _.get(line, col.value);
                 } else if (typeof col.value === 'function') {
-                    return col.value(line);
+                    return col.value(line, values);
                 }
+            },
+            keyToCols(keys) {
+                return keys.map(key => {
+                    let col = this.config.cols[key];
+                    col.key = key;
+
+                    return col;
+                }).filter(col => {
+                    return this.config.visibility === undefined || this.config.visibility[col.key] !== false
+                })
             },
 
             toggle(col, value) {
                 col.expanded = value !== undefined ? value : !col.expanded;
 
                 if (!col.expanded && col.subCols && col.subCols.length > 0) {
-                    col.subCols.forEach(this.hide)
+                    this.keyToCols(col.subCols).forEach(this.hide)
                 }
             },
             hide(col) {
                 col.visible = false;
                 if (col.subCols && col.subCols.length > 0) {
-                    col.subCols.forEach(this.hide)
+                    this.keyToCols(col.subCols).forEach(this.hide)
                 }
             }
         }
